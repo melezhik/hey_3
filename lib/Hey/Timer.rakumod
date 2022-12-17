@@ -1,6 +1,9 @@
 unit module Hey::Timer;
 
 use Hey::Database;
+use Hey::Event;
+use Hey::Project;
+use Hey::Tag;
 use Definitely;
 use DB::SQLite;
 use Prettier::Table;
@@ -12,23 +15,20 @@ our sub current-timers(DB::Connection $connection) returns Maybe[Array] is expor
 	find-ongoing-events("timer", $connection);
 }
 
-our sub timers-since(Int $epoch_since, DB::Connection $connection) returns Array is export {
-	find-events-since("timer", $epoch_since, $connection)
+our sub timers-since(Int $epoch_since, DB::Connection $connection, Str :$order='DESC') returns Array is export {
+	find-events-since("timer", $epoch_since, $connection, order=>$order)
 }
 
-# TODO this should be extracted out to Event as event-projects
-our sub timer-projects(Hash $timer_hash, DB::Connection $connection) returns Array is export {
-	return find-projects-for-event($timer_hash, $connection);
+our sub timer-projects(Int $timer_id, DB::Connection $connection) returns Array is export {
+	return find-projects-for-event($timer_id, $connection);
 }
-# TODO this should be extracted out to Event as event-tags
-our sub timer-tags(Hash $timer_hash, DB::Connection $connection) returns Array is export {
-	return find-tags-for-event($timer_hash, $connection);
+our sub timer-tags(Int $timer_id, DB::Connection $connection) returns Array is export {
+	return find-tags-for-event($timer_id, $connection);
 }
 
 
 # assumes each hash has a <projects> key with an array of project hashes
 our sub display-timers-as-table(@timer_hashes, $title, Bool $include_summary = True) is export {
-	my @sorted_timers = @timer_hashes.sort({$^a<started_at> cmp $^b<started_at>});
 	my $table = Prettier::Table.new(
 		title => $title,
 		field-names => ['ID', 'Started', 'Total', 'Projects', 'Tags'],
@@ -40,13 +40,13 @@ our sub display-timers-as-table(@timer_hashes, $title, Bool $include_summary = T
 	my $total_seconds = 0;
 	my @all_projects = [];
 	my @all_tags = [];
-	for @sorted_timers -> %timer_hash {
+	for @timer_hashes -> %timer_hash {
 		my $dt = DateTime.new(%timer_hash<started_at>);
 		my @project_names = %timer_hash<projects>.map({$_<name>});
 		my @tag_names = %timer_hash<tags>.map({$_<name>});
 		$table.add-row([
 							  %timer_hash<id>,
-							  strftime("%m/%d %H:%M", $dt.local),
+							  strftime("%m/%d %I:%M %p", $dt.local),
 							  total-string(%timer_hash<started_at>,
 										  %timer_hash<ended_at>),
 							  @project_names.sort.join(", "),
@@ -75,6 +75,6 @@ our sub display-timers-as-table(@timer_hashes, $title, Bool $include_summary = T
 our sub total-string(Int $started_at, $ended_at) {
 	return "ongoing" unless $ended_at ~~ Int;
 	my $seconds = $ended_at - $started_at;
-	return duration($seconds);
+	return concise(duration($seconds));
 
 }

@@ -31,9 +31,14 @@
   "perl": "6.d",
   "provides": {
     "Hey::Database": "lib/Hey/Database.rakumod",
+    "Hey::Event": "lib/Hey/Event.rakumod",
     "Hey::Interruption": "lib/Hey/Interruption.rakumod",
+    "Hey::Person": "lib/Hey/Person.rakumod",
+    "Hey::Project": "lib/Hey/Project.rakumod",
     "Hey::Resourcer": "lib/Hey/Resourcer.rakumod",
-    "Hey::Timer": "lib/Hey/Timer.rakumod"
+    "Hey::Tag": "lib/Hey/Tag.rakumod",
+    "Hey::Timer": "lib/Hey/Timer.rakumod",
+    "Hey::Utilities": "lib/Hey/Utilities.rakumod"
   },
   "resources": [
     "data/hey/hey.db"
@@ -45,5 +50,5 @@
   ],
   "test-depends": [
   ],
-  "version": "1.0.0-beta.4"
+  "version": "1.0.0-beta.5"
 }
