@@ -79,5 +79,5 @@ tasks:
     name: install-deps
     language: Bash
     code: |
-      sudo apt-get install -y time 
+      sudo apt-get install -yq time libsqlite3-dev
       zef install --/test Text::Table::Simple
